@@ -1,26 +1,74 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #030712;
+  --foreground: #f9fafb;
+  --primary: #9333ea;
+  --primary-hover: #7e22ce;
+  --accent: #3b82f6;
+  --glass: rgba(17, 24, 39, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
 }
 
 body {
-  background: var(--background);
+  background: radial-gradient(circle at 120% 0%, #17122e 0%, #030712 100%) no-repeat fixed;
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  min-height: 100vh;
+}
+
+/* --- Utilidades de Diseño Premium (WOW factor) --- */
+
+/* Efecto Glassmorphism */
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  border-radius: 1.5rem; /* rounded-3xl approx */
+}
+
+/* Efecto Glow en Hover */
+.glow-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glow-hover:hover {
+  transform: scale(1.02);
+}
+
+/* Animación de entrada fluida */
+@keyframes smoothAppear {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-premium {
+  animation: smoothAppear 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Estilización personalizada del botón de Solana */
+.wallet-adapter-button {
+  background: linear-gradient(135deg, #9333ea 0%, #3b82f6 100%) !important;
+  font-family: inherit !important;
+  font-weight: 600 !important;
+  border-radius: 1rem !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 4px 14px 0 rgba(147, 51, 234, 0.39) !important;
+}
+
+.wallet-adapter-button:not([disabled]):hover {
+  background: linear-gradient(135deg, #a855f7 0%, #60a5fa 100%) !important;
+  box-shadow: 0 8px 25px rgba(147, 51, 234, 0.5) !important;
+  transform: scale(1.05) !important;
+}
+
+/* Fix para que el modal de Solana esté siempre por encima de nuestro Glassmorphism */
+.wallet-adapter-modal {
+  z-index: 9999 !important;
 }
