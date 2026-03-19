@@ -1,7 +1,7 @@
 'use client';
 
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { PublicKey, Transaction } from '@solana/web3.js';
 import { getAssociatedTokenAddress, createTransferInstruction } from '@solana/spl-token';
@@ -13,8 +13,8 @@ const USDC_MINT = new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU');
 /**
  * @description Página de pago para un link específico con diseño Premium.
  */
-export default function PagarPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params);
+export default function PagarPage({ params }: { params: { slug: string } }) {
+  const { slug } = params;
   const { publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
   const [link, setLink] = useState<PaymentLink | null>(null);
