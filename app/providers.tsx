@@ -8,7 +8,6 @@ import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { clusterApiUrl } from "@solana/web3.js";
 import { WalletError } from "@solana/wallet-adapter-base";
 import { useCallback } from "react";
-import "@solana/wallet-adapter-react-ui/styles.css";
 
 /**
  * @description Proveedor de contexto global para Solana y Wallet.
