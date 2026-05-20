@@ -128,7 +128,7 @@ const PaymentCard = ({ link, pagando, pagado, txSignature, publicKey, onPay }: P
         <button
           onClick={onPay}
           disabled={pagando}
-          className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-5 rounded-3xl font-black text-lg hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-purple-500/30 disabled:opacity-30 uppercase tracking-tight"
+          className="w-full cursor-pointer disabled:cursor-not-allowed bg-gradient-to-r from-purple-600 to-blue-600 text-white py-5 rounded-3xl font-black text-lg hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-purple-500/30 disabled:opacity-30 uppercase tracking-tight"
         >
           {pagando ? 'Procesando Transacción...' : `Pagar ${link.amount} USDC`}
         </button>
