@@ -84,7 +84,7 @@ export default function Crear() {
               <button
                 onClick={handleCrear}
                 disabled={loading || !publicKey}
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:scale-[1.02] active:scale-[0.98] text-white py-4 rounded-2xl font-bold transition-all shadow-lg shadow-purple-500/20 disabled:opacity-30 disabled:hover:scale-100"
+                className="w-full cursor-pointer bg-gradient-to-r from-purple-600 to-blue-600 hover:scale-[1.02] active:scale-[0.98] text-white py-4 rounded-2xl font-bold transition-all shadow-lg shadow-purple-500/20 disabled:opacity-30 disabled:hover:scale-100 disabled:cursor-not-allowed"
               >
                 {loading ? 'Procesando Protocolo...' : 'Generar Solana Link'}
               </button>
@@ -101,13 +101,16 @@ export default function Crear() {
 // --- Sub-componentes ---
 
 function InputGroup({ label, placeholder, value, onChange, type = "text", suffix }: any) {
+  const inputId = label.replace(/\s+/g, '-').toLowerCase();
   return (
     <div className="space-y-1.5 px-1">
-      <label className="text-[10px] uppercase tracking-widest text-gray-500 font-bold ml-1">
+      <label htmlFor={inputId} className="text-[10px] uppercase tracking-widest text-gray-500 font-bold ml-1">
         {label}
       </label>
       <div className="relative group">
         <input
+          id={inputId}
+          name={inputId}
           type={type}
           placeholder={placeholder}
           value={value}
@@ -148,7 +151,7 @@ function GeneratedLinkDisplay({ link }: { link: string }) {
       </p>
       <button
         onClick={() => navigator.clipboard.writeText(link)}
-        className="mt-4 w-full py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 text-xs font-bold rounded-xl transition-all border border-purple-500/20"
+        className="mt-4 w-full cursor-pointer py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 text-xs font-bold rounded-xl transition-all border border-purple-500/20"
       >
         Copiar Link al Portapapeles
       </button>
