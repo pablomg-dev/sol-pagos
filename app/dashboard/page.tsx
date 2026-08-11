@@ -2,58 +2,102 @@
 
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useEffect, useState, useRef } from 'react';
-import { supabase } from '../../lib/supabase';
 import { WalletButton } from '../../components/Solana/WalletButton';
-import { User, PaymentLink, Payment } from '../../lib/types';
+import { PaymentLink, Payment } from '../../lib/types';
+import { getAuthMessage } from '../../lib/auth';
+import bs58 from 'bs58';
 import Link from 'next/link';
 
 /**
- * @description Dashboard principal del usuario con diseño Premium.
+ * @description Dashboard principal del usuario autenticado por firma criptográfica.
  */
 export default function Dashboard() {
-  const { publicKey } = useWallet();
+  const { publicKey, signMessage } = useWallet();
   const [pagos, setPagos] = useState<Payment[]>([]);
   const [links, setLinks] = useState<PaymentLink[]>([]);
   const [totalRecibido, setTotalRecibido] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
   const fetched = useRef(false);
 
   useEffect(() => {
-    if (!publicKey || fetched.current) return;
-    fetched.current = true;
+    if (!publicKey || !signMessage || fetched.current) return;
 
-    const loadData = async () => {
+    const loadDashboardData = async () => {
+      fetched.current = true;
       setLoading(true);
-      const user = await fetchUser(publicKey.toBase58());
-      if (user) await fetchDashboardData(user.id);
-      setLoading(false);
+      setErrorMsg('');
+
+      try {
+        const timestamp = Date.now();
+        const walletAddress = publicKey.toBase58();
+        const messageText = getAuthMessage(walletAddress, timestamp, 'GET_DASHBOARD');
+        const messageBytes = new TextEncoder().encode(messageText);
+
+        const signatureBytes = await signMessage(messageBytes);
+        const signatureBase58 = bs58.encode(signatureBytes);
+
+        const response = await fetch('/api/dashboard', {
+          method: 'GET',
+          headers: {
+            'x-wallet-address': walletAddress,
+            'x-signature': signatureBase58,
+            'x-timestamp': timestamp.toString(),
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          setLinks(data.links || []);
+          setPagos(data.payments || []);
+          setTotalRecibido(data.totalCollected || 0);
+        } else {
+          setErrorMsg(data.error || 'Error autenticando la sesión del dashboard.');
+        }
+      } catch (err: any) {
+        if (err?.message?.includes('User rejected')) {
+          setErrorMsg('Firma requerida para acceder a tus datos privados.');
+        } else {
+          setErrorMsg(`Error al cargar datos: ${err.message}`);
+        }
+      } finally {
+        setLoading(false);
+      }
     };
 
-    const fetchDashboardData = async (userId: string) => {
-      const linksData = await fetchUserLinks(userId);
-      const pagosData = await fetchUserPayments(userId);
-      setLinks(linksData);
-      setPagos(pagosData);
-      setTotalRecibido(pagosData.reduce((acc, p) => acc + p.amount, 0));
-    };
-
-    loadData();
-  }, [publicKey]);
+    loadDashboardData();
+  }, [publicKey, signMessage]);
 
   return (
     <main className="min-h-screen p-6 md:p-12 overflow-x-hidden">
       <div className="max-w-4xl mx-auto animate-premium">
         <Header />
-        
+
         {!publicKey && <WalletPrompt />}
-        
+
         {publicKey && loading && (
           <div className="flex justify-center py-20">
-            <p className="text-purple-400 animate-pulse font-medium">Cargando datos del protocolo...</p>
+            <p className="text-purple-400 animate-pulse font-medium">Autenticando firma y cargando dashboard...</p>
           </div>
         )}
 
-        {publicKey && !loading && (
+        {publicKey && errorMsg && (
+          <div className="glass p-8 text-center my-8 border-red-500/20">
+            <p className="text-red-400 font-bold mb-4">{errorMsg}</p>
+            <button
+              onClick={() => {
+                fetched.current = false;
+                window.location.reload();
+              }}
+              className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-all"
+            >
+              Reintentar Firma
+            </button>
+          </div>
+        )}
+
+        {publicKey && !loading && !errorMsg && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="md:col-span-1 space-y-8">
               <Stats total={totalRecibido} />
@@ -74,8 +118,6 @@ export default function Dashboard() {
     </main>
   );
 }
-
-// --- Sub-componentes con Estilo Premium ---
 
 const Header = () => (
   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
@@ -137,7 +179,7 @@ const LinkCard = ({ link }: { link: PaymentLink }) => (
     </div>
     <button
       onClick={() => navigator.clipboard.writeText(`${window.location.origin}/pagar/${link.slug}`)}
-      className="bg-white/5 hover:bg-white/10 text-white text-xs font-bold px-4 py-2 rounded-xl border border-white/10 transition-all uppercase tracking-wider"
+      className="bg-white/5 hover:bg-white/10 text-white text-xs font-bold px-4 py-2 rounded-xl border border-white/10 transition-all uppercase tracking-wider cursor-pointer"
     >
       Copiar Link
     </button>
@@ -166,7 +208,9 @@ const PaymentCard = ({ pago }: { pago: Payment }) => (
       </div>
       <div>
         <p className="font-bold text-white leading-tight">{pago.payment_links?.description}</p>
-        <p className="text-[10px] text-gray-500 font-mono mt-1 uppercase">Remitente: {pago.from_wallet.slice(0, 10)}...</p>
+        <p className="text-[10px] text-gray-500 font-mono mt-1 uppercase">
+          Remitente: {pago.from_wallet.slice(0, 8)}...{pago.from_wallet.slice(-6)}
+        </p>
       </div>
     </div>
     <div className="text-right">
@@ -182,20 +226,3 @@ const PaymentCard = ({ pago }: { pago: Payment }) => (
     </div>
   </div>
 );
-
-// --- Fetchers adaptados ---
-
-async function fetchUser(wallet: string): Promise<User | null> {
-  const { data } = await supabase.from('users').select('*').eq('wallet_address', wallet).single();
-  return data as User | null;
-}
-
-async function fetchUserLinks(userId: string): Promise<PaymentLink[]> {
-  const { data } = await supabase.from('payment_links').select('*').eq('user_id', userId).order('created_at', { ascending: false });
-  return data as PaymentLink[] || [];
-}
-
-async function fetchUserPayments(userId: string): Promise<Payment[]> {
-  const { data } = await supabase.from('payments').select('*, payment_links(description, user_id)').order('created_at', { ascending: false });
-  return (data as any[] || []).filter((p) => p.payment_links?.user_id === userId) as Payment[];
-}

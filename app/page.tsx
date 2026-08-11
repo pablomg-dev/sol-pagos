@@ -34,7 +34,7 @@ export default function Home() {
         </div>
         
         <p className="mt-8 text-center text-gray-500 text-xs tracking-widest uppercase">
-          Powered by Solana & Supabase
+          Powered by Solana & Neon
         </p>
       </div>
     </main>

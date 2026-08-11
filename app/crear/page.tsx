@@ -2,48 +2,70 @@
 
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useState } from 'react';
-import { supabase } from '../../lib/supabase';
 import { WalletButton } from '../../components/Solana/WalletButton';
-import { User } from '../../lib/types';
+import { getAuthMessage } from '../../lib/auth';
+import bs58 from 'bs58';
 import Link from 'next/link';
 
 /**
- * @description Página para crear un nuevo enlace de pago con diseño Premium.
+ * @description Página para crear un nuevo enlace de pago con autenticación por firma de wallet.
  */
 export default function Crear() {
-  const { publicKey } = useWallet();
+  const { publicKey, signMessage } = useWallet();
   const [monto, setMonto] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [loading, setLoading] = useState(false);
   const [linkGenerado, setLinkGenerado] = useState('');
 
-  const generarSlug = (): string => Math.random().toString(36).substring(2, 10);
-
-  /**
-   * @description Maneja la creación del link en la base de datos.
-   */
   const handleCrear = async (): Promise<void> => {
     if (!publicKey) return alert('Conectá tu wallet primero');
-    if (!monto || !descripcion) return alert('Completá todos los campos');
+    if (!signMessage) return alert('Tu wallet no soporta la firma de mensajes.');
+    if (!monto || parseFloat(monto) <= 0) return alert('Ingresá un monto válido mayor a 0');
+    if (!descripcion.trim()) return alert('Ingresá una descripción para el cobro');
 
     setLoading(true);
-    const user: User | null = await fetchUser(publicKey.toBase58());
 
-    if (!user) {
+    try {
+      // 1. Generar mensaje de autenticación y solicitar firma criptográfica en la wallet
+      const timestamp = Date.now();
+      const walletAddress = publicKey.toBase58();
+      const messageText = getAuthMessage(walletAddress, timestamp, 'CREATE_LINK');
+      const messageBytes = new TextEncoder().encode(messageText);
+
+      const signatureBytes = await signMessage(messageBytes);
+      const signatureBase58 = bs58.encode(signatureBytes);
+
+      // 2. Enviar solicitud al servidor Next.js
+      const response = await fetch('/api/links', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-wallet-address': walletAddress,
+          'x-signature': signatureBase58,
+          'x-timestamp': timestamp.toString(),
+        },
+        body: JSON.stringify({
+          amount: parseFloat(monto),
+          description: descripcion.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.slug) {
+        setLinkGenerado(`${window.location.origin}/pagar/${data.slug}`);
+      } else {
+        alert(`Error al crear el link: ${data.error || 'Error desconocido'}`);
+      }
+    } catch (err: any) {
+      if (err?.message?.includes('User rejected')) {
+        console.warn('El usuario canceló la firma del mensaje.');
+      } else {
+        alert(`Error procesando la solicitud: ${err.message}`);
+      }
+    } finally {
       setLoading(false);
-      return alert('Usuario no encontrado. Asegúrate de haberte registrado en el Home.');
     }
-
-    const slug = generarSlug();
-    const isSuccess = await savePaymentLink(user.id, slug, monto, descripcion);
-
-    if (isSuccess) {
-      setLinkGenerado(`${window.location.origin}/pagar/${slug}`);
-    } else {
-      alert('Error creando el link');
-    }
-
-    setLoading(false);
   };
 
   return (
@@ -86,7 +108,7 @@ export default function Crear() {
                 disabled={loading || !publicKey}
                 className="w-full cursor-pointer bg-gradient-to-r from-purple-600 to-blue-600 hover:scale-[1.02] active:scale-[0.98] text-white py-4 rounded-2xl font-bold transition-all shadow-lg shadow-purple-500/20 disabled:opacity-30 disabled:hover:scale-100 disabled:cursor-not-allowed"
               >
-                {loading ? 'Procesando Protocolo...' : 'Generar Solana Link'}
+                {loading ? 'Firmando en Wallet...' : 'Generar Solana Link'}
               </button>
             </div>
           </div>
@@ -97,8 +119,6 @@ export default function Crear() {
     </main>
   );
 }
-
-// --- Sub-componentes ---
 
 function InputGroup({ label, placeholder, value, onChange, type = "text", suffix }: any) {
   const inputId = label.replace(/\s+/g, '-').toLowerCase();
@@ -127,25 +147,10 @@ function InputGroup({ label, placeholder, value, onChange, type = "text", suffix
   );
 }
 
-async function fetchUser(walletAddress: string): Promise<User | null> {
-  const { data } = await supabase.from('users').select('*').eq('wallet_address', walletAddress).single();
-  return data as User | null;
-}
-
-async function savePaymentLink(userId: string, slug: string, amount: string, description: string): Promise<boolean> {
-  const { error } = await supabase.from('payment_links').insert({
-    user_id: userId,
-    slug,
-    amount: parseFloat(amount),
-    description,
-  });
-  return !error;
-}
-
 function GeneratedLinkDisplay({ link }: { link: string }) {
   return (
     <div className="mt-8 p-6 bg-purple-500/10 border border-purple-500/20 rounded-2xl animate-premium">
-      <p className="text-purple-400 text-[10px] font-black uppercase tracking-wider mb-2">¡Transacción preparada!</p>
+      <p className="text-purple-400 text-[10px] font-black uppercase tracking-wider mb-2">¡Link generado exitosamente!</p>
       <p className="text-sm break-all text-white font-mono bg-black/30 p-3 rounded-lg border border-white/5 select-all">
         {link}
       </p>
@@ -158,4 +163,3 @@ function GeneratedLinkDisplay({ link }: { link: string }) {
     </div>
   );
 }
-
