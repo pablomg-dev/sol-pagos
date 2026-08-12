@@ -308,9 +308,9 @@ class LazyDatabaseAdapter implements DatabaseAdapter {
       return this.instance;
     }
 
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === 'production' && process.env.ALLOW_IN_MEMORY_DB !== 'true') {
       throw new Error(
-        '[SECURITY ERROR] La variable de entorno DATABASE_URL no está configurada en producción. Se prohíbe el uso de InMemoryAdapter en entorno de producción.'
+        '[SECURITY ERROR] La variable de entorno DATABASE_URL no está configurada en producción. Se prohíbe el uso de InMemoryAdapter en entorno de producción salvo que ALLOW_IN_MEMORY_DB=true.'
       );
     }
 
