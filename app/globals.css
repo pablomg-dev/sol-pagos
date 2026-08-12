@@ -21,6 +21,11 @@ body {
   min-height: 100vh;
 }
 
+button:not(:disabled),
+[role="button"]:not(:disabled) {
+  cursor: pointer;
+}
+
 /* --- Utilidades de Diseño Premium (WOW factor) --- */
 
 /* Efecto Glassmorphism */

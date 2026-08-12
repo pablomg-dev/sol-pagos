@@ -55,7 +55,7 @@ function UserFeedback({ user, error }: { user: User | null; error: string | null
       </p>
 
       <Link href="/dashboard" className="w-full">
-        <button className="w-full bg-white/5 hover:bg-white/10 text-white py-4 rounded-2xl font-bold border border-white/10 transition-all hover:scale-[1.02] active:scale-[0.98]">
+        <button className="w-full bg-white/5 hover:bg-white/10 text-white py-4 rounded-2xl font-bold border border-white/10 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer">
           Ir a mi Dashboard →
         </button>
       </Link>
