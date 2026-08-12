@@ -165,26 +165,37 @@ const LinksSection = ({ links }: { links: PaymentLink[] }) => (
   </section>
 );
 
-const LinkCard = ({ link }: { link: PaymentLink }) => (
-  <div className="glass p-5 flex justify-between items-center group glow-hover">
-    <div>
-      <p className="font-bold text-white text-lg group-hover:text-purple-300 transition-colors uppercase tracking-tight">
-        {link.description}
-      </p>
-      <div className="flex items-center gap-2 mt-1">
-        <span className="text-purple-400 text-sm font-bold">{link.amount} USDC</span>
-        <span className="text-gray-600 text-xs">•</span>
-        <span className="text-gray-500 text-xs font-mono">/{link.slug}</span>
+const LinkCard = ({ link }: { link: PaymentLink }) => {
+  const [copiado, setCopiado] = useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(`${window.location.origin}/pagar/${link.slug}`);
+    setCopiado(true);
+    setTimeout(() => setCopiado(false), 2000);
+  };
+
+  const btnStyle = copiado
+    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+    : 'bg-white/5 hover:bg-white/10 text-white border-white/10';
+
+  return (
+    <div className="glass p-5 flex justify-between items-center group glow-hover">
+      <div>
+        <p className="font-bold text-white text-lg group-hover:text-purple-300 transition-colors uppercase tracking-tight">
+          {link.description}
+        </p>
+        <div className="flex items-center gap-2 mt-1">
+          <span className="text-purple-400 text-sm font-bold">{link.amount} USDC</span>
+          <span className="text-gray-600 text-xs">•</span>
+          <span className="text-gray-500 text-xs font-mono">/{link.slug}</span>
+        </div>
       </div>
+      <button onClick={handleCopy} className={`text-xs font-bold px-4 py-2 rounded-xl border transition-all uppercase tracking-wider cursor-pointer ${btnStyle}`}>
+        {copiado ? '¡Copiado! ✓' : 'Copiar Link'}
+      </button>
     </div>
-    <button
-      onClick={() => navigator.clipboard.writeText(`${window.location.origin}/pagar/${link.slug}`)}
-      className="bg-white/5 hover:bg-white/10 text-white text-xs font-bold px-4 py-2 rounded-xl border border-white/10 transition-all uppercase tracking-wider cursor-pointer"
-    >
-      Copiar Link
-    </button>
-  </div>
-);
+  );
+};
 
 const PaymentsSection = ({ pagos }: { pagos: Payment[] }) => (
   <section>

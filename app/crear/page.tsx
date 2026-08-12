@@ -148,6 +148,18 @@ function InputGroup({ label, placeholder, value, onChange, type = "text", suffix
 }
 
 function GeneratedLinkDisplay({ link }: { link: string }) {
+  const [copiado, setCopiado] = useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(link);
+    setCopiado(true);
+    setTimeout(() => setCopiado(false), 2000);
+  };
+
+  const btnClass = copiado
+    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+    : 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border-purple-500/20';
+
   return (
     <div className="mt-8 p-6 bg-purple-500/10 border border-purple-500/20 rounded-2xl animate-premium">
       <p className="text-purple-400 text-[10px] font-black uppercase tracking-wider mb-2">¡Link generado exitosamente!</p>
@@ -155,10 +167,10 @@ function GeneratedLinkDisplay({ link }: { link: string }) {
         {link}
       </p>
       <button
-        onClick={() => navigator.clipboard.writeText(link)}
-        className="mt-4 w-full cursor-pointer py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 text-xs font-bold rounded-xl transition-all border border-purple-500/20"
+        onClick={handleCopy}
+        className={`mt-4 w-full cursor-pointer py-3 text-xs font-bold rounded-xl transition-all border ${btnClass}`}
       >
-        Copiar Link al Portapapeles
+        {copiado ? '¡Link Copiado al Portapapeles! ✓' : 'Copiar Link al Portapapeles'}
       </button>
     </div>
   );
