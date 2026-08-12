@@ -19,10 +19,10 @@ export default function Home() {
 
       <div className="z-10 w-full max-w-lg animate-premium">
         <div className="glass p-10 flex flex-col items-center text-center">
-          <h1 className="text-5xl font-extrabold mb-4 pb-2 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent leading-normal">
+          <h1 className="text-5xl font-extrabold mb-4 pb-2 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent leading-normal">
             Solpagos
           </h1>
-          <p className="text-gray-400 text-lg mb-10 max-w-[280px]">
+          <p className="text-gray-400 text-lg mb-10 max-w-70">
             Cobrá en USDC en la red de Solana, <span className="text-white font-medium">fácil y rápido.</span>
           </p>
 

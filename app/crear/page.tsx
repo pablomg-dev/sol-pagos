@@ -106,7 +106,7 @@ export default function Crear() {
               <button
                 onClick={handleCrear}
                 disabled={loading || !publicKey}
-                className="w-full cursor-pointer bg-gradient-to-r from-purple-600 to-blue-600 hover:scale-[1.02] active:scale-[0.98] text-white py-4 rounded-2xl font-bold transition-all shadow-lg shadow-purple-500/20 disabled:opacity-30 disabled:hover:scale-100 disabled:cursor-not-allowed"
+                className="w-full cursor-pointer bg-linear-to-r from-purple-600 to-blue-600 hover:scale-[1.02] active:scale-[0.98] text-white py-4 rounded-2xl font-bold transition-all shadow-lg shadow-purple-500/20 disabled:opacity-30 disabled:hover:scale-100 disabled:cursor-not-allowed"
               >
                 {loading ? 'Firmando en Wallet...' : 'Generar Solana Link'}
               </button>

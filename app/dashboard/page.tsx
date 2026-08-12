@@ -102,7 +102,7 @@ export default function Dashboard() {
             <div className="md:col-span-1 space-y-8">
               <Stats total={totalRecibido} />
               <Link href="/crear" className="block glow-hover">
-                <div className="bg-gradient-to-br from-purple-600 to-blue-600 p-4 rounded-2xl text-center font-bold text-white shadow-lg shadow-purple-500/20">
+                <div className="bg-linear-to-br from-purple-600 to-blue-600 p-4 rounded-2xl text-center font-bold text-white shadow-lg shadow-purple-500/20">
                   + Crear Nuevo Link
                 </div>
               </Link>
@@ -123,7 +123,7 @@ const Header = () => (
   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
     <div>
       <Link href="/">
-        <h1 className="text-4xl font-extrabold pb-2 bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity leading-normal">
+        <h1 className="text-4xl font-extrabold pb-2 bg-linear-to-r from-white to-gray-500 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity leading-normal">
           Mi Dashboard
         </h1>
       </Link>

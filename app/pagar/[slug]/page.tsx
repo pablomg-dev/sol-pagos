@@ -87,7 +87,7 @@ export default function PagarPage({ params }: { params: { slug: string } }) {
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/10 blur-[150px] rounded-full -z-10" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-150 bg-purple-600/10 blur-[150px] rounded-full -z-10" />
 
       <div className="w-full max-w-lg animate-premium">
         <PaymentCard
@@ -165,7 +165,7 @@ const PaymentCard = ({ link, pagando, pagado, txSignature, publicKey, errorMessa
         <button
           onClick={onPay}
           disabled={pagando}
-          className="w-full cursor-pointer disabled:cursor-not-allowed bg-gradient-to-r from-purple-600 to-blue-600 text-white py-5 rounded-3xl font-black text-lg hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-purple-500/30 disabled:opacity-30 uppercase tracking-tight"
+          className="w-full cursor-pointer disabled:cursor-not-allowed bg-linear-to-r from-purple-600 to-blue-600 text-white py-5 rounded-3xl font-black text-lg hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-purple-500/30 disabled:opacity-30 uppercase tracking-tight"
         >
           {pagando ? 'Verificando On-Chain...' : `Pagar ${link.amount} USDC`}
         </button>
